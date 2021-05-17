@@ -1,23 +1,29 @@
 package infrastructure
 
 import (
-	"ajisai-api-server/config"
+	"github.com/K-shir0/ajisai-api-server/config"
 	"github.com/labstack/echo"
 	"net/http"
 )
 
-func Init() {
-	conf := config.New()
+type Router struct {
+	config *config.Config
+	e      *echo.Echo
+}
 
-	e := echo.New()
+func Init() {
+	r := Router{
+		config: config.New(),
+		e:      echo.New(),
+	}
 
 	// コントローラの呼び出し
 
 	// ルーティング
-	e.GET("/", func(c echo.Context) error {
+	r.e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
 	// echo server start
-	e.Logger.Fatal(e.Start(":" + conf.Port))
+	r.e.Logger.Fatal(r.e.Start(":" + r.config.Port))
 }
