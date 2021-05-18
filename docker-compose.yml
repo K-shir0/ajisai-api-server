@@ -1,8 +1,17 @@
-version: '3'
+version: '3.0'
+
 services:
-  redis:
-    image: "redis:latest"
+
+  mongo:
+    image: mongo
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
     ports:
-      - "6379:6379"
+      - 27017:27017
     volumes:
-      - "./out/redis:/data"
+      - ./out/db/mongo:/data/db
+      - ./out/db/config:/data/configdb

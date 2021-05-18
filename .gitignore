@@ -1,2 +1,5 @@
 config/config.yaml
+
 out
+
+.env

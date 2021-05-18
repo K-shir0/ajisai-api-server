@@ -3,3 +3,8 @@ redis:
   password: ""
   port: 6379
   host: 127.0.0.1
+mongodb:
+  user: "root"
+  password: "password"
+  port: 28018
+  host: 127.0.0.1

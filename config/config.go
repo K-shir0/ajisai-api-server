@@ -9,6 +9,13 @@ type Config struct {
 		Port     string `default:"6379"`
 		Host     string `default:"127.0.0.1"`
 	}
+	MongoDB struct {
+		User     string `default:"root"`
+		Password string `default:"password"`
+		Port     string `default:"27017"`
+		Host     string `default:"127.0.0.1"`
+		Database string `default:"test"`
+	}
 }
 
 func New() *Config {
