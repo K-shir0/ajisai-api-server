@@ -9,7 +9,11 @@ import (
 	"time"
 )
 
-func (r *Router) NewSqlHandler() *mongo.Client {
+type SqlHandler struct {
+	Conn *mongo.Database
+}
+
+func (r *Router) NewSqlHandler() *mongo.Database {
 	uri := "mongodb://" + r.config.MongoDB.User + ":" + r.config.MongoDB.Password + "@" + r.config.MongoDB.Host + ":" + r.config.MongoDB.Port
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -25,5 +29,9 @@ func (r *Router) NewSqlHandler() *mongo.Client {
 
 	fmt.Println("Successfully connected and pinged.")
 
-	return client
+	return client.Database(r.config.MongoDB.Database)
+}
+
+func Execute() {
+
 }

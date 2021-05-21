@@ -1,14 +1,12 @@
 package infrastructure
 
 import (
-	"context"
 	"fmt"
 	"github.com/K-shir0/ajisai-api-server/config"
 	"github.com/K-shir0/ajisai-api-server/domain"
+	database2 "github.com/K-shir0/ajisai-api-server/interfaces/database"
 	"github.com/labstack/echo"
-	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
-	"time"
 )
 
 type Router struct {
@@ -28,22 +26,14 @@ func Init() {
 	// Ping the primary
 	fmt.Println(db)
 
-	// Context
-	ctx := context.Background()
+	wr := database2.WeathersRepository{Collection: db.Collection("hoge")}
 
 	// ルーティングa
 	r.e.GET("/weathers", func(c echo.Context) error {
 
-		collection := db.Database("test").Collection("hoge")
-
-		cur, err := collection.Find(ctx, bson.M{})
+		weathers, err := wr.FindAll()
 		if err != nil {
-			return err
-		}
-
-		var weathers []bson.M
-		if err = cur.All(ctx, &weathers); err != nil {
-			return err
+			return c.String(http.StatusBadRequest, "")
 		}
 
 		return c.JSON(http.StatusOK, weathers)
@@ -55,12 +45,8 @@ func Init() {
 			return err
 		}
 
-		// set date
-		now := time.Now()
-		param.UpdatedAt, param.CreatedAt = now, now
-
 		// insert DB
-		res, err := db.Database("test").Collection("hoge").InsertOne(ctx, param)
+		res, err := wr.Store(param)
 		if err != nil {
 			return err
 		}
