@@ -5,6 +5,7 @@ import (
 	"github.com/K-shir0/ajisai-api-server/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -13,7 +14,13 @@ type WeathersRepository struct {
 }
 
 func (repo *WeathersRepository) FindAll() ([]bson.M, error) {
-	cur, err := repo.Find(context.TODO(), bson.M{})
+
+	o := options.Find()
+
+	o.SetSort(bson.D{{"_id", -1}})
+	o.SetLimit(100)
+
+	cur, err := repo.Find(context.TODO(), bson.M{}, o)
 	if err != nil {
 		return nil, err
 	}
