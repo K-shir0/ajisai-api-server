@@ -26,7 +26,7 @@ func Init() {
 	// Ping the primary
 	fmt.Println(db)
 
-	wr := database.WeathersRepository{Collection: db.Collection("hoge")}
+	wr := database.WeathersRepository{Collection: db.Collection("weather")}
 
 	// ルーティングa
 	r.e.GET("/weathers", func(c echo.Context) error {
