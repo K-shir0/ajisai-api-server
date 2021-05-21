@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/K-shir0/ajisai-api-server/config"
 	"github.com/K-shir0/ajisai-api-server/domain"
-	database2 "github.com/K-shir0/ajisai-api-server/interfaces/database"
+	"github.com/K-shir0/ajisai-api-server/interfaces/database"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -26,7 +26,7 @@ func Init() {
 	// Ping the primary
 	fmt.Println(db)
 
-	wr := database2.WeathersRepository{Collection: db.Collection("hoge")}
+	wr := database.WeathersRepository{Collection: db.Collection("hoge")}
 
 	// ルーティングa
 	r.e.GET("/weathers", func(c echo.Context) error {
