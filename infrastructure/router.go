@@ -1,11 +1,11 @@
 package infrastructure
 
 import (
-	"fmt"
 	"github.com/K-shir0/ajisai-api-server/config"
 	"github.com/K-shir0/ajisai-api-server/domain"
 	"github.com/K-shir0/ajisai-api-server/interfaces/database"
 	"github.com/labstack/echo"
+	"golang.org/x/net/websocket"
 	"net/http"
 )
 
@@ -22,9 +22,6 @@ func Init() {
 
 	// コントローラの呼び出し
 	db := r.NewSqlHandler()
-
-	// Ping the primary
-	fmt.Println(db)
 
 	wr := database.WeathersRepository{Collection: db.Collection("weather")}
 
@@ -51,9 +48,36 @@ func Init() {
 			return err
 		}
 
+		message = param
+		flag = true
+
 		return c.JSON(http.StatusOK, res)
 	})
 
+	r.e.GET("/ws", hello)
+
 	// echo server start
 	r.e.Logger.Fatal(r.e.Start(":" + r.config.Port))
+}
+
+var message *domain.Weather
+var flag = false
+
+func hello(c echo.Context) error {
+	websocket.Handler(func(ws *websocket.Conn) {
+		defer ws.Close()
+		for {
+			// Write
+			if flag {
+				flag = false
+
+				err := websocket.JSON.Send(ws, message)
+				if err != nil {
+					c.Logger().Error(err)
+					break
+				}
+			}
+		}
+	}).ServeHTTP(c.Response(), c.Request())
+	return nil
 }
