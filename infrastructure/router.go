@@ -65,7 +65,12 @@ var flag = false
 
 func hello(c echo.Context) error {
 	websocket.Handler(func(ws *websocket.Conn) {
-		defer ws.Close()
+		defer func(ws *websocket.Conn) {
+			err := ws.Close()
+			if err != nil {
+				c.Logger().Error(err)
+			}
+		}(ws)
 		for {
 			// Write
 			if flag {
