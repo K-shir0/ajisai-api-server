@@ -1,11 +1,13 @@
 package infrastructure
 
 import (
+	"fmt"
 	"github.com/K-shir0/ajisai-api-server/config"
 	"github.com/K-shir0/ajisai-api-server/domain"
 	"github.com/K-shir0/ajisai-api-server/interfaces/database"
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
-	"golang.org/x/net/websocket"
+	"github.com/labstack/echo/middleware"
 	"net/http"
 )
 
@@ -20,12 +22,14 @@ func Init() {
 		e:      echo.New(),
 	}
 
+	r.e.Use(middleware.CORS())
+
 	// コントローラの呼び出し
 	db := r.NewSqlHandler()
 
 	wr := database.WeathersRepository{Collection: db.Collection("weather")}
 
-	// ルーティングa
+	// ルーティング
 	r.e.GET("/weathers", func(c echo.Context) error {
 
 		weathers, err := wr.FindAll()
@@ -63,26 +67,55 @@ func Init() {
 var message *domain.Weather
 var flag = false
 
-func hello(c echo.Context) error {
-	websocket.Handler(func(ws *websocket.Conn) {
-		defer func(ws *websocket.Conn) {
-			err := ws.Close()
-			if err != nil {
-				c.Logger().Error(err)
-			}
-		}(ws)
-		for {
-			// Write
-			if flag {
-				flag = false
+var (
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+)
 
-				err := websocket.JSON.Send(ws, message)
-				if err != nil {
-					c.Logger().Error(err)
-					break
-				}
-			}
+func hello(c echo.Context) error {
+	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer ws.Close()
+
+	for {
+		// Write
+		err := ws.WriteMessage(websocket.TextMessage, []byte("Hello, Client!"))
+		if err != nil {
+			c.Logger().Error(err)
 		}
-	}).ServeHTTP(c.Response(), c.Request())
-	return nil
+
+		// Read
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			c.Logger().Error(err)
+		}
+		fmt.Printf("%s\n", msg)
+	}
+
+	//websocket.Handler(func(ws *websocket.Conn) {
+	//	defer func(ws *websocket.Conn) {
+	//		err := ws.Close()
+	//		if err != nil {
+	//			c.Logger().Error(err)
+	//		}
+	//	}(ws)
+	//	for {
+	//		// Write
+	//		if flag {
+	//			flag = false
+	//
+	//			err := websocket.JSON.Send(ws, message)
+	//			if err != nil {
+	//				c.Logger().Error(err)
+	//				break
+	//			}
+	//		}
+	//	}
+	//}).ServeHTTP(c.Response(), c.Request())
+	//return nil
 }
